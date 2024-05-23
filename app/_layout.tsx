@@ -23,18 +23,22 @@ function calculateSimilarity(str1: string, str2: string): number {
   const len1: number = str1.length;
   const len2: number = str2.length;
   const matrix: number[][] = Array.from(Array(len1 + 1), () => Array(len2 + 1).fill(0));
-
+  // uses two matrixs and compares them to see if your response is similar to a already existing response
   for (let i = 0; i <= len1; i++) {
       matrix[i][0] = i;
   }
-
   for (let j = 0; j <= len2; j++) {
       matrix[0][j] = j;
   }
 
   for (let i = 1; i <= len1; i++) {
       for (let j = 1; j <= len2; j++) {
-          const cost: number = str1[i - 1] === str2[j - 1] ? 0 : 1;
+        // Calculate the minimum cost of operations needed to transform the substring str1[0..i-1] to str2[0..j-1]:
+        // - matrix[i - 1][j] + 1: Deletion cost (removing a character from str1).
+        // - matrix[i][j - 1] + 1: Insertion cost (adding a character to str1).
+        // - matrix[i - 1][j - 1] + cost: Substitution cost (replacing a character in str1 with a character from str2)
+        // so awsome would equal awesome and respose would match awesome even if you typed awsome  
+        const cost: number = str1[i - 1] === str2[j - 1] ? 0 : 1;
           matrix[i][j] = Math.min(
               matrix[i - 1][j] + 1,
               matrix[i][j - 1] + 1,
