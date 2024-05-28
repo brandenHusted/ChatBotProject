@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 // Function to find the best matching question
 function findBestMatch(userInput: string, questions: string[]): string | null {
     const threshold: number = 0.4;
+    // best match can calculate if a string is similar to another string else null is returned
     let bestMatch: string | null = null;
     let bestMatchScore: number = 0;
 
@@ -49,6 +51,7 @@ export default function HomeScreen(): JSX.Element {
     const [userInput, setUserInput] = useState<string>('');
     const [chatHistory, setChatHistory] = useState<{ sender: string; message: string }[]>([]);
     const [correctAnswer, setCorrectAnswer] = useState<string>('');
+    const navigation = useNavigation();
     const [knowledgeBase, setKnowledgeBase] = useState<{ question: string; answer: string }[]>([
         { question: 'Hi how are you', answer: 'I am doing great today, thanks for asking! How about you?' }
     ]);
@@ -56,8 +59,10 @@ export default function HomeScreen(): JSX.Element {
 
     useEffect(() => {
         if (!isTeachingMode && chatHistory.length >= 2) {
+            // find last user message
             const lastUserMessage = chatHistory[chatHistory.length - 2].message;
             const response = simulateChatbotResponse(lastUserMessage);
+            // Create a new array that includes all elements of prevChatHistory except the last one
             setChatHistory(prevChatHistory => [
                 ...prevChatHistory.slice(0, -1),
                 { sender: 'bot', message: response }
@@ -86,8 +91,35 @@ export default function HomeScreen(): JSX.Element {
         setUserInput('');
     };
 
+    const undo = (): void => {
+        setChatHistory(prevChatHistory => {
+            if (prevChatHistory.length < 2) return prevChatHistory;
+            // to remove chat history we use slice
+            return prevChatHistory.slice(0, -2);
+        });
+        setKnowledgeBase(prevKnowledgeBase => {
+            if (prevKnowledgeBase.length === 0) return prevKnowledgeBase;
+            // ?.message attempts to access the message property of that item.
+            // Optional chaining simplifies the code and makes it more readable by reducing the need for explicit null checks at each level of the property access chain.
+            const lastUserMessage = chatHistory[chatHistory.length - 2]?.message;
+            return prevKnowledgeBase.filter(item => item.question !== lastUserMessage);
+        });
+
+        setCorrectAnswer('');
+        setIsTeachingMode(false);
+    };
+
+    const goBack = (): void => {
+        // go back
+        navigation.goBack();
+    };
+
     const handleTeachMe = (): void => {
         if (chatHistory.length < 2) return; // Ensure there are at least two messages in the chat history
+        if (!correctAnswer.trim()) {
+            alert('Please type an answer for the chatbot to learn.'); // Alert the user to type an answer
+            return;
+        }
 
         setKnowledgeBase(prevKnowledgeBase => [
             ...prevKnowledgeBase,
@@ -100,13 +132,22 @@ export default function HomeScreen(): JSX.Element {
 
     return (
         <View style={styles.container}>
+            <View style={styles.header}>
+                <TouchableOpacity onPress={goBack} style={styles.backButton}>
+                    <Text>Back</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={undo} style={styles.undoButton}>
+                    <Text>Undo</Text>
+                </TouchableOpacity>
+            </View>
             <ScrollView style={styles.chatContainer}>
                 {chatHistory.map((message, index) => (
                     <Text key={index} style={message.sender === 'user' ? styles.userMessage : styles.botMessage}>
-                        {message.message}
-                    </Text>
-                ))}
+                         {message.message}
+                     </Text>
+                 ))}
             </ScrollView>
+
             {!isTeachingMode && (
                 <View style={styles.inputContainer}>
                     <TextInput
@@ -136,13 +177,26 @@ export default function HomeScreen(): JSX.Element {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
+    },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
+        paddingHorizontal: 10,
+        paddingVertical: 10,
+        backgroundColor: '#f5f5f5',
+    },
+    backButton: {
+        padding: 10,
+    },
+    undoButton: {
+        padding: 10,
     },
     chatContainer: {
         flex: 1,
         width: '100%',
         padding: 10,
+        backgroundColor: 'black',
     },
     inputContainer: {
         flexDirection: 'row',
@@ -179,4 +233,3 @@ const styles = StyleSheet.create({
         paddingVertical: 5,
     },
 });
-
