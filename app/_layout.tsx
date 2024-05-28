@@ -68,7 +68,7 @@ export default function HomeScreen(): JSX.Element {
                 { sender: 'bot', message: response }
             ]);
         }
-    }, [knowledgeBase, isTeachingMode]);
+    }, [knowledgeBase, isTeachingMode, navigation]);
 
     function simulateChatbotResponse(userInput: string): string {
         const bestMatch: string | null = findBestMatch(userInput, knowledgeBase.map(question => question.question));
@@ -233,3 +233,5 @@ const styles = StyleSheet.create({
         paddingVertical: 5,
     },
 });
+
+
