@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+
 
 // Function to find the best matching question
 function findBestMatch(userInput: string, questions: string[]): string | null {
@@ -51,7 +51,6 @@ export default function HomeScreen(): JSX.Element {
     const [userInput, setUserInput] = useState<string>('');
     const [chatHistory, setChatHistory] = useState<{ sender: string; message: string }[]>([]);
     const [correctAnswer, setCorrectAnswer] = useState<string>('');
-    const navigation = useNavigation();
     const [knowledgeBase, setKnowledgeBase] = useState<{ question: string; answer: string }[]>([
         { question: 'Hi how are you', answer: 'I am doing great today, thanks for asking! How about you?' }
     ]);
@@ -68,7 +67,7 @@ export default function HomeScreen(): JSX.Element {
                 { sender: 'bot', message: response }
             ]);
         }
-    }, [knowledgeBase, isTeachingMode, navigation]);
+    }, [knowledgeBase, isTeachingMode]);
 
     function simulateChatbotResponse(userInput: string): string {
         const bestMatch: string | null = findBestMatch(userInput, knowledgeBase.map(question => question.question));
@@ -111,7 +110,6 @@ export default function HomeScreen(): JSX.Element {
 
     const goBack = (): void => {
         // go back
-        navigation.goBack();
     };
 
     const handleTeachMe = (): void => {
@@ -233,5 +231,27 @@ const styles = StyleSheet.create({
         paddingVertical: 5,
     },
 });
+
+/*import React from 'react';
+import { View, Text, Button } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+
+const HomeScreen = () => {
+  const navigation = useNavigation();
+
+  return (
+    <View>
+      <Text>Home Screen</Text>
+      <Button
+        title="Go to About"
+        onPress={() => navigation.navigate('About')}
+      />
+      
+    </View>
+  );
+};
+
+export default HomeScreen;*/
+
 
 
