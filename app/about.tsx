@@ -1,8 +1,8 @@
-/*import React from 'react';
+import React from 'react';
 import { View, Text, Button } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
-const AboutScreen = () => {
+const AboutScreen: React.FC = () => {
   const navigation = useNavigation();
 
   return (
@@ -11,7 +11,7 @@ const AboutScreen = () => {
       <Text>About Screen</Text>
       <Button
         title="Go to Home"
-        onPress={() => navigation.navigate('Home')}
+        
       />
       
       
@@ -19,4 +19,4 @@ const AboutScreen = () => {
   );
 };
 
-export default AboutScreen;*/
+export default AboutScreen;
