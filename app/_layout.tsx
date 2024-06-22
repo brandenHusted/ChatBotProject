@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, ScrollView, TouchableOpacity, Animated, Easing } from 'react-native';
-import { useNavigation, NavigationProp } from '@react-navigation/native'; 
+
 
 const HomeScreen: React.FC = () => {
-    const navigation = useNavigation<NavigationProp<any>>();
-
+    const [refresh, setRefresh] = useState<number>(0);
     const [userInput, setUserInput] = useState<string>('');
     const [chatHistory, setChatHistory] = useState<{ sender: string; message: string }[]>([]);
     const [correctAnswer, setCorrectAnswer] = useState<string>('');
@@ -12,7 +11,8 @@ const HomeScreen: React.FC = () => {
         { question: 'Hi how are you', answer: 'I am doing great today, thanks for asking! How about you?' }
     ]);
     const [isTeachingMode, setIsTeachingMode] = useState<boolean>(false);
-
+    const [normalChatBot, setnormalChatBot] = useState<boolean>(false);
+([])
     // Animation for the menu
     const [menuVisible, setMenuVisible] = useState(false);
     const translateX = useState(new Animated.Value(-250))[0];
@@ -26,7 +26,7 @@ const HomeScreen: React.FC = () => {
                 { sender: 'bot', message: response }
             ]);
         }
-    }, [knowledgeBase, isTeachingMode]);
+    }, [knowledgeBase, isTeachingMode, normalChatBot]);
 
     function findBestMatch(userInput: string, questions: string[]): string | null {
         const threshold: number = 0.4;
@@ -73,12 +73,21 @@ const HomeScreen: React.FC = () => {
 
     function simulateChatbotResponse(userInput: string): string {
         const bestMatch: string | null = findBestMatch(userInput, knowledgeBase.map(question => question.question));
+        if (normalChatBot == true) {
+            if (bestMatch) {
+                return knowledgeBase.find(question => question.question === bestMatch)!.answer;  
+        } else {
+            setIsTeachingMode(false);
+            return 'I do not have an answer to your question. Would you like to ask me a different question?'
+        }
+    }
         if (bestMatch) {
             return knowledgeBase.find(question => question.question === bestMatch)!.answer;
         } else {
             setIsTeachingMode(true);
+            setnormalChatBot(false);
             return 'I do not know the answer. Can you teach me, human?';
-        }
+        } 
     }
 
     const sendMessageToChatbot = (): void => {
@@ -143,11 +152,15 @@ const HomeScreen: React.FC = () => {
         }).start();
     };
 
-    const goToAbout = (): void => {
-        navigation.navigate('About');
+    const normalChat = () => {
+        setRefresh(refresh + 1);  
+        setnormalChatBot(true); 
     };
 
-
+    const userInputAI = () => {
+        setRefresh(refresh + 1);  
+        setnormalChatBot(false); 
+    };
     return (
         <View style={styles.container}>
             <View style={styles.header}>
@@ -159,10 +172,15 @@ const HomeScreen: React.FC = () => {
                 </TouchableOpacity>
             </View>
             <Animated.View style={[styles.menuContainer, { transform: [{ translateX }] }]}>
-            <TouchableOpacity onPress={closeMenu} style={styles.closeButton}>
+                <TouchableOpacity onPress={closeMenu} style={styles.closeButton}>
                     <Text>X</Text>
-            </TouchableOpacity>
-                
+                </TouchableOpacity>
+                <View style={styles.buttonSpacing}>
+                    <Button title="Normal AI" onPress={normalChat} />
+                </View>
+                <View style={styles.buttonSpacing}>
+                    <Button title="User Input AI" onPress={userInputAI} />
+                </View>
             </Animated.View>
             <ScrollView style={styles.chatContainer}>
                 {chatHistory.map((message, index) => (
@@ -210,10 +228,10 @@ const styles = StyleSheet.create({
         backgroundColor: '#f5f5f5',
     },
     menuButton: {
-        padding: 10,
+        padding: 25,
     },
     undoButton: {
-        padding: 10,
+        padding: 25,
     },
     menuContainer: {
         position: 'absolute',
@@ -241,35 +259,39 @@ const styles = StyleSheet.create({
     },
     input: {
         flex: 1,
-        marginRight: 10,
         borderWidth: 1,
-        borderColor: 'gray',
-        borderRadius: 5,
-        paddingHorizontal: 10,
-    },
-    userMessage: {
-        alignSelf: 'flex-end',
-        backgroundColor: '#e0e0e0',
+        borderColor: '#ccc',
         padding: 10,
-        marginVertical: 5,
-        borderRadius: 10,
-    },
-    botMessage: {
-        alignSelf: 'flex-start',
-        backgroundColor: '#d3d3d3',
-        padding: 10,
-        marginVertical: 5,
-        borderRadius: 10,
-    },
-    closeButton: {
-        alignSelf: 'flex-end',
-        padding: 10,
+        marginRight: 10,
     },
     teachMeContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 10,
         paddingVertical: 5,
+    },
+    userMessage: {
+        alignSelf: 'flex-end',
+        backgroundColor: '#e1ffc7',
+        padding: 10,
+        borderRadius: 5,
+        marginVertical: 5,
+        color: 'black',
+    },
+    botMessage: {
+        alignSelf: 'flex-start',
+        backgroundColor: '#f1f1f1',
+        padding: 10,
+        borderRadius: 5,
+        marginVertical: 5,
+        color: 'black',
+    },
+    buttonSpacing: {
+        marginVertical: 10,
+    },
+    closeButton: {
+        alignSelf: 'flex-end',
+        padding: 10,
     },
 });
 
