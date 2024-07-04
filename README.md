@@ -20,3 +20,6 @@ npx expo start
 
 Thank me later
 
+npm install react-native@latest
+to update react
+
