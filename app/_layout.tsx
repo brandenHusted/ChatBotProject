@@ -274,11 +274,13 @@ const HomeScreen: React.FC = () => {
         // set to pregenerated questions
         setRefresh(refresh + 1);  
         setnormalChatBot(true); 
+        alert('You have selected Normal Chat mode.');
     };
 
     const userInputAI = () => {
         setRefresh(refresh + 1);  
-        setnormalChatBot(false); 
+        setnormalChatBot(false);
+        alert('You have selected User Input AI mode.'); 
     };
     return (
         <View style={styles.container}>
